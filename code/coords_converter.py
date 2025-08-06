@@ -4,13 +4,13 @@ from astropy.table import Table
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 
-from pyongc.ongc import listObjects
-
 
 def convert_eq_gal(ra_list=None, dec_list=None, l_list=None, b_list=None):
     """
-    Convert RA and Dec lists to Galactic coordinates (l, b), accepting either
-    float values in degrees or sexagesimal strings (e.g. '10h12m30s', '41d16m30s').
+    Convert between RA / Dec and Galactic coordinates (l, b)
+
+    Input is as lists accepting either float values in decimal degrees or
+    sexagesimal strings (e.g. '10h12m30s', '41d16m30s').
 
     Parameters:
     -----------
@@ -18,11 +18,15 @@ def convert_eq_gal(ra_list=None, dec_list=None, l_list=None, b_list=None):
         List of Right Ascension values (sexagesimal string or float degrees).
     dec_list : list of str or float
         List of Declination values (sexagesimal string or float degrees).
+    l_list : list of str or float
+        List of Galactic longitude values (float degrees).
+    b_list : list of str or float
+        List of Galactic latitude values (float degrees).
 
     Returns:
     --------
-    list of tuples
-        List of (l, b) Galactic coordinates in degrees.
+    Two np.arrays
+        Coordinates in decimal degrees (l, b) or (ra, dec)
 
     """
     if ra_list is not None and dec_list is not None:
@@ -53,6 +57,10 @@ def convert_eq_gal(ra_list=None, dec_list=None, l_list=None, b_list=None):
 
 def ongc_gal_coords(catalog="M", filename=None):
     """
+    Get l/b coordinates for all objects in the Open-NGC catalog
+
+    This requires pyongc to be installed
+    https://github.com/mattiaverga/PyOngc
 
     Parameters
     ----------
@@ -65,6 +73,8 @@ def ongc_gal_coords(catalog="M", filename=None):
     tbl: astropy.table.Table
 
     """
+    from pyongc.ongc import listObjects
+
     if catalog.lower() in ["ngc", "ic", "m"]:
         objects = listObjects(catalog=catalog.upper())
     else:
@@ -91,5 +101,5 @@ def ongc_gal_coords(catalog="M", filename=None):
     return tbl
 
 
-ongc_gal_coords("", "test.txt")
+# ongc_gal_coords("", "test.txt")
 
