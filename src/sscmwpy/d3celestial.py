@@ -49,7 +49,7 @@ def get_stars(lim_mag=6):
     tbl = table.Table(tbl_array,
                       names=('id', 'mag', 'bv', 'ra', 'dec'),
                       dtype=(int, float, float, float, float))
-    ls, bs = convert_eq_gal(ra_list=tbl["ra"] / 15., dec_list=tbl["dec"])
+    ls, bs = convert_eq_gal(ra_list=tbl["ra"] / 15. % 24, dec_list=tbl["dec"])
     tbl.add_columns([table.Column(data=ls, name="l"),
                      table.Column(data=bs, name="b")])
 
@@ -98,7 +98,7 @@ def get_milky_way_contours(surf_bri_lvl=0):
                             dtype=(float, float))
                 for coords in feature["geometry"]["coordinates"]]
     for tbl in ras_decs:
-        ls, bs = convert_eq_gal(ra_list=tbl["ra"] / 15., dec_list=tbl["dec"])
+        ls, bs = convert_eq_gal(ra_list=tbl["ra"] / 15. % 24, dec_list=tbl["dec"])
         tbl.add_columns([table.Column(data=ls, name="l"),
                          table.Column(data=bs, name="b")])
 
@@ -135,7 +135,7 @@ def get_messier_objects(lim_mag=20):
     tbl = table.Table(tbl_array,
                       names=('name', 'type', 'mag', 'dim', 'ra', 'dec'),
                       dtype=(str, str, float, str, float, float))
-    ls, bs = convert_eq_gal(ra_list=tbl["ra"] / 15., dec_list=tbl["dec"])
+    ls, bs = convert_eq_gal(ra_list=tbl["ra"] / 15. % 24, dec_list=tbl["dec"])
     tbl.add_columns([table.Column(data=ls, name="l"),
                      table.Column(data=bs, name="b")])
     mask = tbl["mag"] < lim_mag
@@ -183,9 +183,13 @@ def get_dsos(lim_mag=6):
     tbl = table.Table(tbl_array,
                       names=('name', 'type', 'mag', 'dim', 'ra', 'dec'),
                       dtype=(str, str, float, str, float, float))
-    ls, bs = convert_eq_gal(ra_list=tbl["ra"] / 15., dec_list=tbl["dec"])
+    tbl = tbl[np.abs(tbl["dec"]) <= 90]
+    ls, bs = convert_eq_gal(ra_list=tbl["ra"] / 15. % 24, dec_list=tbl["dec"])
     tbl.add_columns([table.Column(data=ls, name="l"),
                      table.Column(data=bs, name="b")])
+    areas = [int(np.prod([float(x) for x in y.split("x")]))
+             if "x" in y else int(float(y)**2) for y in tbl["dim"]]
+    tbl.add_column(table.Column(data=areas, name="area"))
     mask = tbl["mag"] < lim_mag
 
     return tbl[mask]
@@ -195,6 +199,11 @@ def get_dsos(lim_mag=6):
 # print(get_milky_way_contours())
 # print(get_messier_objects())
 # print(get_dsos())
+
+# tbl = get_dsos(14)
+# tbl = tbl[np.abs(tbl["b"]) < 10]
+# plt.scatter(tbl["l"], tbl["b"], 1, c="k")
+# plt.show()
 
 def plot_mw_stars(mode="eq"):
     tbl_mw = get_milky_way_contours(0)
@@ -241,4 +250,4 @@ def plot_mw_stars(mode="eq"):
     plt.show()
 
 
-plot_mw_stars("gal")
+# plot_mw_stars("gal")
